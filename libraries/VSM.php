@@ -98,15 +98,6 @@ class VSM
             $arrayDf[$key] = 0;
         }
 
-        // pengisian df dari $query
-        foreach ($term as $key => $value) {
-            foreach ($query as $key1 => $value1) {
-                if ($key == $value1) {
-                    $arrayDf[$key] += 1;
-                }
-            }
-        }
-
         // pengisian df dari dokumen
         foreach ($term as $key => $value) {
             foreach ($dokumen_term as $key1 => $value1) {
@@ -115,6 +106,13 @@ class VSM
                         $arrayDf[$key] += 1;
                     }
                 }
+            }
+        }
+        
+        // meghapus df dengan nilai 0
+        foreach ($arrayDf as $key => $value) {
+            if ($value == 0) {
+                unset($arrayDf[$key]);
             }
         }
 
@@ -132,7 +130,7 @@ class VSM
     public static function idf($query, $dokumen_term, $df)
     {
         // n = jumlah dokumen + query
-        $N_count = count($dokumen_term) + 1;
+        $N_count = count($dokumen_term);
 
         $arrayIdf =[];
         foreach ($df as $key => $value) {
@@ -157,7 +155,7 @@ class VSM
         foreach ($idf as $key => $value) {
             foreach ($query as $key1 => $value1) {
                 if ($key == $value1) {
-                    $bobotQuery[$key] = (1*$value);
+                    $bobotQuery[$key] = pow((1 * $value), 2);
                 }
             }
         }
@@ -169,7 +167,7 @@ class VSM
             foreach ($idf as $key => $value) {
                 foreach ($dokumen['dokumen'] as $key1 => $value1) {
                     if ($key == $key1) {
-                        $arrayTampung += [$key => ($value*$value1),];
+                        $arrayTampung += [$key => pow(($value * $value1), 2)];
                     }
                 }
             }
@@ -202,13 +200,11 @@ class VSM
         foreach ($bobot['dokumen'] as $index => $dokumen) { // dokumen 1, 2, 3 ... n
             $arrayDoc[$index] = ["id_doc" => $dokumen['id_doc']];
             $bobotDoc[$index] = 0;
-            foreach ($bobot['query'] as $key => $value) {
+           
                 foreach ($dokumen['dokumen'] as $key1 => $value1) { // isi dr dokumen 1, 2, ..n
-                    if ($key == $key1) {
-                        $bobotDoc[$index] += ($value1 + $value1);
+                        $bobotDoc[$index] += ($value1);
                     }
-                }
-            }
+            
             $arrayDoc[$index] += ["jumlah_bobot" => $bobotDoc[$index], "akar_bobot" => sqrt($bobotDoc[$index])];
             array_push($dokumenCosJumlahAkar,  $arrayDoc[$index]);
         }
